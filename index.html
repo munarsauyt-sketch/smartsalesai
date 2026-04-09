@@ -443,13 +443,13 @@ function upnav() {
       '<span style="font-size:13px;font-weight:600;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + U.username + '</span>' +
       '<span style="color:var(--t3);font-size:11px">&#x25BE;</span></div>' +
       '<div id="um" style="display:none;position:absolute;top:42px;right:0;background:var(--bg2);border:1px solid var(--b2);border-radius:10px;padding:5px;min-width:160px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.5)">' +
-      '<button onclick="go('cabinet');toggleum()" style="width:100%;height:34px;background:none;border:none;color:var(--t1);text-align:left;padding:0 10px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer" onmouseover="this.style.background='var(--s1)'" onmouseout="this.style.background='none'">&#x1F4E6; Кабинет</button>' +
-      '<button onclick="dologout()" style="width:100%;height:34px;background:none;border:none;color:var(--red);text-align:left;padding:0 10px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer" onmouseover="this.style.background='var(--rd)'" onmouseout="this.style.background='none'">Выйти</button>' +
+      '<button onclick="go(&quot;cabinet&quot;);toggleum()" style="width:100%;height:34px;background:none;border:none;color:var(--t1);text-align:left;padding:0 10px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer" onmouseover="this.style.background=&quot;var(--s1)&quot;" onmouseout="this.style.background=&quot;none&quot;">&#x1F4E6; Кабинет</button>' +
+      '<button onclick="dologout()" style="width:100%;height:34px;background:none;border:none;color:var(--red);text-align:left;padding:0 10px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer" onmouseover="this.style.background=&quot;var(--rd)&quot;" onmouseout="this.style.background=&quot;none&quot;">Выйти</button>' +
       '</div></div>' +
-      '<button class="btn bp" onclick="rauth(function(){om('madd')})">+ Продать</button>';
+      '<button class="btn bp" onclick="rauth(function(){om(&quot;madd&quot;)})">+ Продать</button>';
   } else {
-    nr.innerHTML = '<button class="btn bg" onclick="om('mauth')">Войти</button>' +
-      '<button class="btn bp" onclick="rauth(function(){om('madd')})">+ Продать</button>';
+    nr.innerHTML = '<button class="btn bg" onclick="om(&quot;mauth&quot;)">Войти</button>' +
+      '<button class="btn bp" onclick="rauth(function(){om(&quot;madd&quot;)})">+ Продать</button>';
   }
 }
 
@@ -481,7 +481,7 @@ function render(data, w) {
   for (var i = 0; i < data.length; i++) {
     var l = data[i];
     var em = l.emoji || EMOJI[l.category] || '🎮';
-    var th = l.photo_url ? '<img class="lth" src="' + l.photo_url + '" style="width:52px;height:52px;border-radius:9px;object-fit:cover;background:var(--s1)" onerror="this.style.display='none';this.nextSibling.style.display='flex'">' : '';
+    var th = l.photo_url ? '<img class="lth" src="' + l.photo_url + '" style="width:52px;height:52px;border-radius:9px;object-fit:cover;background:var(--s1)" onerror="this.style.display=&quot;none&quot;;this.nextSibling.style.display=&quot;flex&quot;">' : '';
     var ic = '<div class="ltic" style="background:#' + (l.bg||'1a2030') + ';' + (l.photo_url ? 'display:none' : '') + '">' + em + '</div>';
     html += '<div class="lrow" onclick="openprod(' + l.id + ')">' + th + ic +
       '<div class="linfo"><div class="ltitle">' + l.title + '</div>' +
@@ -514,7 +514,7 @@ function openprod(id) {
   curP = p;
   var iw = document.getElementById('pmimg');
   if (p.photo_url) {
-    iw.innerHTML = '<img class="pmimg" src="' + p.photo_url + '" onerror="this.outerHTML='<div class=pmic>' + (p.emoji||'🎮') + '</div>'">';
+    iw.innerHTML = '<img class="pmimg" src="' + p.photo_url + '" onerror="this.outerHTML=&quot;<div class=pmic>' + (p.emoji||'🎮') + '</div>&quot;">';
   } else {
     iw.innerHTML = '<div class="pmic">' + (p.emoji || EMOJI[p.category] || '🎮') + '</div>';
   }
@@ -593,7 +593,7 @@ async function loadmy() {
   var html = '';
   for (var i = 0; i < data.length; i++) {
     var l = data[i];
-    var th = l.photo_url ? '<img class="mlth" src="' + l.photo_url + '" onerror="this.style.display='none';this.nextSibling.style.display='flex'">' : '';
+    var th = l.photo_url ? '<img class="mlth" src="' + l.photo_url + '" onerror="this.style.display=&quot;none&quot;;this.nextSibling.style.display=&quot;flex&quot;">' : '';
     var ic = '<div class="mltic" style="background:#' + (l.bg||'1a2030') + ';' + (l.photo_url ? 'display:none' : '') + '">' + (l.emoji||'🎮') + '</div>';
     html += '<div class="mlrow">' + th + ic +
       '<div><div class="mlname">' + l.title + '</div><div class="mlsub">' + l.category + '</div></div>' +
@@ -636,7 +636,8 @@ async function loadchats() {
     var c = map[keys[k]];
     var last = c.msgs[0];
     var ini = c.name.substring(0,2).toUpperCase();
-    html += '<div class="cli" onclick="openchat('' + c.id + '','' + c.name.replace(/'/g,"\'") + '',' + (c.lid||0) + ','')">' +
+    var safeName = c.name.replace(/"/g,'&quot;');
+    html += '<div class="cli" onclick="openchat(&quot;' + c.id + '&quot;,&quot;' + safeName + '&quot;,' + (c.lid||0) + ',&quot;&quot;)">' +
       '<div class="clav">' + ini + '</div>' +
       '<div style="flex:1;min-width:0"><div class="clname">' + c.name + '</div><div class="clprev">' + last.text + '</div></div>' +
       '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="cltime">' + fmt(last.created_at) + '</div>' +
