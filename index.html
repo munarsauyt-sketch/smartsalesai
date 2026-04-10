@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SmartSalesAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#0b0c10;color:#e2e4ec;min-height:100vh}
+:root{
+--bg0:#0b0c10;--bg1:#111318;--bg2:#161820;--bg3:#1d1f2a;
+--s1:#252838;--s2:#2d3045;
+--b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);
+--t1:#e2e4ec;--t2:#9198b4;--t3:#555d7a;
+--a:#4e7cff;--a2:#6e54f7;
+--green:#22c55e;--gd:rgba(34,197,94,.12);
+--red:#ef4444;--rd:rgba(239,68,68,.1);
+--yellow:#f59e0b;
+}
+.page{display:none}.page.on{display:block;animation:fu .2s ease}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(60px);opacity:0;transition:.28s;max-width:300px;pointer-events:none}
+#toast.on{transform:none;opacity:1}
+#toast.ok{background:#1a2e1a;border:1px solid var(--green);color:var(--green)}
+#toast.err{background:#2e1a1a;border:1px solid var(--red);color:var(--red)}
+#toast.info{background:#1a1e2e;border:1px solid var(--a);color:#8aabff}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;padding:16px}
+.overlay.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--b2);border-radius:16px;padding:28px;width:100%;max-width:460px;position:relative;max-height:90vh;overflow-y:auto}
+.mxl{max-width:740px}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:16px}
+.mc{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer}
+.fg{margin-bottom:14px}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.fi{width:100%;height:42px;background:var(--bg0);border:1px solid var(--b1);border-radius:8px;padding:0 13px;color:var(--t1);font-size:14px;outline:none;transition:.18s}
+.fi:focus{border-color:var(--a)}
+.fi::placeholder{color:var(--t3)}
+.fta{width:100%;min-height:80px;background:var(--bg0);border:1px solid var(--b1);border-radius:8px;padding:11px 13px;color:var(--t1);font-size:14px;outline:none;resize:vertical;line-height:1.5}
+.fta:focus{border-color:var(--a)}
+.fta::placeholder{color:var(--t3)}
+.fsel{width:100%;height:42px;background:var(--bg0);border:1px solid var(--b1);border-radius:8px;padding:0 13px;color:var(--t1);font-size:14px;outline:none;appearance:none}
+.ferr{font-size:12px;color:var(--red);margin-top:5px;display:none}
+.ferr.on{display:block}
+.btn{height:38px;padding:0 16px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:.18s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.bp{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff}
+.bp:hover{opacity:.9}
+.bp:disabled{opacity:.4;cursor:not-allowed}
+.bg{background:none;border:1px solid var(--b2);color:var(--t1)}
+.bg:hover{border-color:var(--a);color:var(--a)}
+.bfull{width:100%;height:44px;justify-content:center;font-size:15px}
+nav{height:58px;display:flex;align-items:center;padding:0 24px;background:rgba(11,12,16,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:500;gap:0}
+.logo{display:flex;align-items:center;gap:9px;cursor:pointer;margin-right:20px}
+.lmark{width:30px;height:30px;background:linear-gradient(135deg,var(--a),var(--a2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#fff}
+.ltxt{font-size:15px;font-weight:700;color:#fff}
+.ltxt span{color:#7eb3ff}
+.nsrch{flex:1;max-width:340px;position:relative}
+.nsrch input{width:100%;height:34px;background:var(--bg2);border:1px solid var(--b1);border-radius:8px;padding:0 12px 0 34px;color:var(--t1);font-size:13px;outline:none}
+.nsrch input:focus{border-color:var(--a)}
+.nsrch input::placeholder{color:var(--t3)}
+.nsrch svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none}
+.ntabs{display:flex;gap:1px;margin-left:16px}
+.ntab{height:32px;padding:0 12px;background:none;border:none;border-radius:7px;color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;transition:.15s;white-space:nowrap}
+.ntab:hover{color:var(--t1);background:var(--s1)}
+.ntab.on{color:#fff;background:var(--s2)}
+.nright{margin-left:auto;display:flex;align-items:center;gap:8px}
+.catwrap{display:flex;max-width:1180px;margin:0 auto;padding:24px 20px 60px;gap:18px}
+.sidebar{width:190px;flex-shrink:0}
+.sbt{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;padding:0 4px}
+.sbi{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;color:var(--t2);font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.sbi:hover{background:var(--s1);color:var(--t1)}
+.sbi.on{background:var(--s2);color:var(--a)}
+.sbic{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.catmain{flex:1;min-width:0}
+.cattop{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.catttl{font-size:16px;font-weight:700}
+.listings{display:flex;flex-direction:column;gap:7px}
+.lrow{display:grid;grid-template-columns:52px 1fr auto auto auto;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:12px;cursor:pointer;transition:.15s}
+.lrow:hover{border-color:var(--b2);background:var(--s1)}
+.lth{width:52px;height:52px;border-radius:9px;object-fit:cover;background:var(--s1)}
+.ltic{width:52px;height:52px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.linfo{min-width:0}
+.ltitle{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+.lmeta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3)}
+.lsell{color:var(--t2);font-weight:500}
+.ldot{width:2px;height:2px;background:var(--t3);border-radius:50%}
+.lrat{font-size:12px;font-weight:700;color:var(--yellow);white-space:nowrap}
+.lpri .val{font-size:15px;font-weight:800;color:#fff;white-space:nowrap}
+.lpri .sub{font-size:10px;color:var(--t3);text-align:right}
+.bbuy{height:30px;padding:0 14px;background:var(--green);border:none;border-radius:7px;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.bbuy:hover{filter:brightness(1.1)}
+.empty{text-align:center;padding:56px 20px;color:var(--t3)}
+.emptyic{font-size:44px;margin-bottom:12px}
+.emptyt{font-size:16px;font-weight:600;color:var(--t2);margin-bottom:6px}
+.skel{background:var(--bg2);border:1px solid var(--b1);border-radius:12px;height:70px;animation:sh 1.5s infinite}
+@keyframes sh{0%,100%{opacity:.5}50%{opacity:1}}
+.pmimg{width:100%;height:220px;object-fit:cover;border-radius:8px;margin-bottom:16px}
+.pmic{width:100%;height:180px;display:flex;align-items:center;justify-content:center;font-size:60px;background:var(--s1);border-radius:8px;margin-bottom:16px}
+.pmttl{font-size:18px;font-weight:700;margin-bottom:4px}
+.pmsell{font-size:13px;color:var(--t2);margin-bottom:14px}
+.pmdesc{font-size:13px;color:var(--t2);line-height:1.6;background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:16px}
+.pmprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.pmpri{font-size:28px;font-weight:800}
+.pmdel{font-size:13px;color:var(--green);font-weight:600}
+.pdrop{width:100%;height:110px;background:var(--bg0);border:2px dashed var(--b2);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;position:relative;overflow:hidden}
+.pdrop:hover{border-color:var(--a)}
+.pdrop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.pprev{width:100%;height:110px;object-fit:cover;border-radius:12px;margin-top:8px}
+.cabwrap{max-width:960px;margin:0 auto;padding:26px 20px 70px}
+.cabtabs{display:flex;gap:3px;background:var(--bg2);border:1px solid var(--b1);border-radius:12px;padding:3px;width:fit-content;margin-bottom:22px}
+.ctab{height:32px;padding:0 16px;background:none;border:none;border-radius:8px;color:var(--t2);font-size:13px;font-weight:600;cursor:pointer}
+.ctab.on{background:var(--s2);color:#fff}
+.card{background:var(--bg2);border:1px solid var(--b1);border-radius:12px;padding:22px}
+.mlrow{display:grid;grid-template-columns:48px 1fr auto auto auto;align-items:center;gap:12px;padding:11px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:12px;margin-bottom:7px}
+.mlth{width:48px;height:48px;border-radius:8px;object-fit:cover;background:var(--s1)}
+.mltic{width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--s1)}
+.mlname{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px}
+.mlsub{font-size:11px;color:var(--t3)}
+.bdg{padding:3px 9px;border-radius:6px;font-size:11px;font-weight:700}
+.bdgg{background:var(--gd);color:var(--green)}
+.statsrow{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:18px}
+.statc{background:var(--bg3);border:1px solid var(--b1);border-radius:12px;padding:16px}
+.statl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px}
+.statv{font-size:22px;font-weight:800}
+.bxs{height:27px;padding:0 9px;border-radius:6px;font-size:11px;font-weight:700;border:none;cursor:pointer}
+.bxsd{background:var(--rd);color:var(--red)}
+.chatwrap{display:flex;max-width:1100px;margin:0 auto;padding:20px 20px 60px;gap:16px}
+.chatlist{width:260px;flex-shrink:0;background:var(--bg2);border:1px solid var(--b1);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 100px)}
+.clhd{padding:14px 16px;border-bottom:1px solid var(--b1);font-size:14px;font-weight:700}
+.clbody{flex:1;overflow-y:auto}
+.cli{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;transition:.15s;border-bottom:1px solid var(--b1)}
+.cli:hover{background:var(--s1)}
+.cli.on{background:var(--s2)}
+.clav{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.clname{font-size:13px;font-weight:600;color:#fff}
+.clprev{font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cltime{font-size:10px;color:var(--t3);flex-shrink:0}
+.clunread{width:18px;height:18px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.chatbox{flex:1;display:flex;flex-direction:column;background:var(--bg2);border:1px solid var(--b1);border-radius:12px;overflow:hidden;min-height:500px;max-height:calc(100vh - 100px)}
+.chathd{padding:14px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:11px}
+.chatav{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
+.chatmsgs{flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.msg{display:flex;gap:8px;max-width:74%}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.mbub{padding:9px 12px;border-radius:11px;font-size:13px;line-height:1.5;word-break:break-word}
+.msg.them .mbub{background:var(--s1);border-radius:3px 11px 11px 11px}
+.msg.me .mbub{background:var(--a);color:#fff;border-radius:11px 3px 11px 11px}
+.mav{width:28px;height:28px;border-radius:50%;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;align-self:flex-end}
+.mtime{font-size:10px;color:var(--t3);margin-top:3px}
+.msg.me .mtime{text-align:right}
+.chatinpw{padding:12px 14px;border-top:1px solid var(--b1);display:flex;gap:8px}
+.chatinp{flex:1;height:40px;background:var(--bg0);border:1px solid var(--b1);border-radius:8px;padding:0 13px;color:var(--t1);font-size:13px;outline:none}
+.chatinp:focus{border-color:var(--a)}
+.chatsend{width:40px;height:40px;background:var(--a);border:none;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.chatsend:hover{background:var(--a2)}
+@media(max-width:900px){.sidebar,.chatlist{display:none}.statsrow{grid-template-columns:1fr 1fr}.lrow{grid-template-columns:44px 1fr auto}.lrat{display:none}}
+@media(max-width:600px){nav{padding:0 14px}.nsrch{max-width:130px}.ntabs{display:none}.catwrap{padding:14px 14px 40px}.modal{padding:18px}.mxl{max-width:98vw}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div class="overlay" id="mauth">
+  <div class="modal">
+    <button class="mc" onclick="cm('mauth')">&#x2715;</button>
+    <h3>Добро пожаловать</h3>
+    <div style="display:flex;gap:4px;background:var(--bg0);border-radius:8px;padding:3px;margin-bottom:18px">
+      <button id="tl" onclick="atab('l')" style="flex:1;height:30px;background:var(--s2);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Войти</button>
+      <button id="tr" onclick="atab('r')" style="flex:1;height:30px;background:none;border:none;border-radius:6px;color:var(--t2);font-size:13px;font-weight:600;cursor:pointer">Регистрация</button>
+    </div>
+    <div id="fl">
+      <div class="fg"><label>Email</label><input class="fi" id="le" type="email" placeholder="your@email.com"></div>
+      <div class="fg"><label>Пароль</label><input class="fi" id="lp" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')dologin()"></div>
+      <div class="ferr" id="lerr"></div>
+      <button class="btn bp bfull" id="lbtn" onclick="dologin()" style="margin-top:4px">Войти</button>
+    </div>
+    <div id="fr" style="display:none">
+      <div class="fg"><label>Имя пользователя</label><input class="fi" id="rn" type="text" placeholder="CoolSeller_KZ"></div>
+      <div class="fg"><label>Email</label><input class="fi" id="re" type="email" placeholder="your@email.com"></div>
+      <div class="fg"><label>Пароль (мин. 6)</label><input class="fi" id="rp" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doreg()"></div>
+      <div class="ferr" id="rerr"></div>
+      <button class="btn bp bfull" id="rbtn" onclick="doreg()" style="margin-top:4px">Создать аккаунт</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="mprod">
+  <div class="modal">
+    <button class="mc" onclick="cm('mprod')">&#x2715;</button>
+    <div id="pmimg"></div>
+    <div class="pmttl" id="pmttl"></div>
+    <div class="pmsell" id="pmsell"></div>
+    <div class="pmdesc" id="pmdesc"></div>
+    <div class="pmprow"><div class="pmpri" id="pmpri"></div><div class="pmdel" id="pmdel"></div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn bp" style="flex:1;height:44px;font-size:15px" onclick="buyprod()">Купить</button>
+      <button class="btn bg" style="height:44px;padding:0 18px" onclick="chatfromprod()">&#x1F4AC; Написать</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="madd">
+  <div class="modal mxl">
+    <button class="mc" onclick="cm('madd')">&#x2715;</button>
+    <h3>Разместить товар</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div>
+        <div class="fg"><label>Название</label><input class="fi" id="nt" type="text" placeholder="Brawl Stars — 5000 Гемов"></div>
+        <div class="fg"><label>Категория</label>
+          <select class="fsel" id="nc">
+            <option>Brawl Stars</option><option>PUBG Mobile</option><option>Roblox</option>
+            <option>Standoff 2</option><option>Steam</option><option>CS2</option>
+            <option>Free Fire</option><option>Mobile Legends</option><option>Другое</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg"><label>Цена (&#x20B8;)</label><input class="fi" id="np" type="number" placeholder="4200" min="1"></div>
+          <div class="fg"><label>Доставка</label>
+            <select class="fsel" id="nd"><option>Моментально</option><option>~5 мин</option><option>~15 мин</option><option>~1 час</option></select>
+          </div>
+        </div>
+        <div class="fg"><label>Описание</label><textarea class="fta" id="ndesc" placeholder="Опишите товар подробно..."></textarea></div>
+      </div>
+      <div>
+        <div class="fg">
+          <label>Фото товара</label>
+          <div class="pdrop" id="pdrop">
+            <input type="file" accept="image/*" onchange="onphoto(this)">
+            <div style="font-size:26px">&#x1F4F7;</div>
+            <div style="font-size:12px;color:var(--t3)">Нажмите или перетащите</div>
+          </div>
+          <img id="pprev" class="pprev" style="display:none">
+        </div>
+        <div class="fg"><label>Данные товара (приватно)</label><textarea class="fta" id="ndat" placeholder="Логин: ...&#10;Пароль: ..."></textarea></div>
+      </div>
+    </div>
+    <div class="ferr" id="aerr"></div>
+    <button class="btn bp bfull" id="abtn" onclick="addlisting()">Опубликовать</button>
+  </div>
+</div>
+
+<nav>
+  <div class="logo" onclick="go('catalog')">
+    <div class="lmark">S</div>
+    <div class="ltxt">SmartSales<span>AI</span></div>
+  </div>
+  <div class="nsrch">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="srch" placeholder="Поиск товаров..." oninput="dosearch(this.value)">
+  </div>
+  <div class="ntabs">
+    <button class="ntab on" id="ntcatalog" onclick="go('catalog')">&#x1F6D2; Каталог</button>
+    <button class="ntab" id="ntchat" onclick="rauth(function(){go('chat')})">&#x1F4AC; Чаты</button>
+    <button class="ntab" id="ntcabinet" onclick="rauth(function(){go('cabinet')})">&#x1F4E6; Кабинет</button>
+  </div>
+  <div class="nright" id="nright">
+    <button class="btn bg" onclick="om('mauth')">Войти</button>
+    <button class="btn bp" onclick="rauth(function(){om('madd')})">+ Продать</button>
+  </div>
+</nav>
+
+<div class="page on" id="pagecatalog">
+  <div class="catwrap">
+    <aside class="sidebar">
+      <div style="margin-bottom:20px">
+        <div class="sbt">Категории</div>
+        <div class="sbi on" onclick="fcat('all',this)"><span class="sbic">&#x1F3AE;</span>Все игры</div>
+        <div class="sbi" onclick="fcat('Brawl Stars',this)"><span class="sbic">&#x1F3AF;</span>Brawl Stars</div>
+        <div class="sbi" onclick="fcat('PUBG Mobile',this)"><span class="sbic">&#x1F52B;</span>PUBG Mobile</div>
+        <div class="sbi" onclick="fcat('Roblox',this)"><span class="sbic">&#x1F9F1;</span>Roblox</div>
+        <div class="sbi" onclick="fcat('Steam',this)"><span class="sbic">&#x1F3AE;</span>Steam</div>
+        <div class="sbi" onclick="fcat('CS2',this)"><span class="sbic">&#x1F3C6;</span>CS2</div>
+        <div class="sbi" onclick="fcat('Standoff 2',this)"><span class="sbic">&#x1F52A;</span>Standoff 2</div>
+        <div class="sbi" onclick="fcat('Другое',this)"><span class="sbic">&#x1F4E6;</span>Другое</div>
+      </div>
+    </aside>
+    <main class="catmain">
+      <div class="cattop">
+        <div class="catttl" id="catttl">Все товары</div>
+        <button class="btn bp" onclick="rauth(function(){om('madd')})">+ Добавить</button>
+      </div>
+      <div id="lw">
+        <div class="skel" style="margin-bottom:7px"></div>
+        <div class="skel" style="margin-bottom:7px"></div>
+        <div class="skel"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="page" id="pagechat">
+  <div class="chatwrap">
+    <div class="chatlist">
+      <div class="clhd">&#x1F4AC; Сообщения</div>
+      <div class="clbody" id="clibody">
+        <div style="padding:24px;text-align:center;color:var(--t3);font-size:13px">Нет диалогов</div>
+      </div>
+    </div>
+    <div class="chatbox" id="chatbox">
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--t3)">
+        <div style="font-size:38px">&#x1F4AC;</div>
+        <div style="font-size:14px">Выберите диалог</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="pagecabinet">
+  <div class="cabwrap">
+    <div style="margin-bottom:22px">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:4px">Кабинет продавца</h2>
+      <p style="color:var(--t2);font-size:14px">Управляйте товарами и выводите деньги</p>
+    </div>
+    <div class="cabtabs">
+      <button class="ctab on" onclick="cabt('listings')">&#x1F4E6; Мои товары</button>
+      <button class="ctab" onclick="cabt('payouts')">&#x1F4B3; Выплаты</button>
+    </div>
+    <div id="cabtlistings">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div style="font-size:13px;color:var(--t2)">Ваши объявления</div>
+        <button class="btn bp" onclick="om('madd')">+ Добавить</button>
+      </div>
+      <div id="mlw"><div class="empty"><div class="emptyic">&#x1F4E6;</div><div class="emptyt">Нет товаров</div></div></div>
+      <div class="statsrow">
+        <div class="statc"><div class="statl">Заработано</div><div class="statv" id="svearn" style="color:var(--green)">0 &#x20B8;</div></div>
+        <div class="statc"><div class="statl">Продаж</div><div class="statv" id="svsales" style="color:var(--a)">0</div></div>
+        <div class="statc"><div class="statl">Рейтинг</div><div class="statv" id="svrate">&#x2014;</div></div>
+      </div>
+    </div>
+    <div id="cabtpayouts" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(232,48,48,.15);display:flex;align-items:center;justify-content:center">&#x1F534;</div>
+            <div style="font-size:15px;font-weight:700">Kaspi QR</div>
+          </div>
+          <div id="kqr" style="background:var(--bg3);border-radius:8px;padding:20px;text-align:center;margin-bottom:12px;color:var(--t3);font-size:13px;min-height:60px;display:flex;align-items:center;justify-content:center">&#x1F4F1; Нажмите для QR</div>
+          <button class="btn bfull" style="background:#e83030;color:#fff;border:none;cursor:pointer" onclick="genkaspi()">Оплатить через Kaspi</button>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:18px">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(124,77,255,.15);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#a07cff">&#x042E;</div>
+            <div style="font-size:15px;font-weight:700">ЮMoney</div>
+          </div>
+          <div class="fg"><label>Кошелёк / Телефон</label><input class="fi" type="text" placeholder="+7 (999) 000-00-00"></div>
+          <button class="btn bfull" onclick="toast('Перенаправляем...','info')" style="background:linear-gradient(135deg,#7c4dff,#5c35cc);color:#fff;border:none;cursor:pointer">Оплатить через ЮMoney</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var SB_URL = 'https://zoyqyqbimotlxyesgyua.supabase.co';
+var SB_KEY = 'sb_publishable_xQ2GXRqOMQjWUdydJv9yrg_WFLbSHcO';
+var EMOJI = {'Brawl Stars':'🎯','PUBG Mobile':'🔫','Roblox':'🧱','Standoff 2':'🔪','Steam':'🎮','CS2':'🏆','Free Fire':'🌟','Mobile Legends':'⚔️','Другое':'📦'};
+var BG = {'Brawl Stars':'1a2a3a','PUBG Mobile':'1a2218','Roblox':'1a1a2a','Standoff 2':'2a1a1a','Steam':'1a2030','CS2':'1a2025','Free Fire':'1e2a1a','Mobile Legends':'1a1e2a','Другое':'1a1a1a'};
+var sb, U=null, all=[], flt='all', curP=null, curChat=null, chatSub=null, photoB64=null;
+try { sb = supabase.createClient(SB_URL, SB_KEY); } catch(e) { console.error(e); }
+
+function toast(msg, type) {
+  if (!type) type = 'ok';
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'on ' + type;
+  clearTimeout(t._t); t._t = setTimeout(function(){ t.className = ''; }, 3200);
+}
+function om(id) { document.getElementById(id).classList.add('on'); }
+function cm(id) { document.getElementById(id).classList.remove('on'); }
+function rauth(fn) { if (U) fn(); else { om('mauth'); window._pend = fn; } }
+function showerr(id, msg) { var e = document.getElementById(id); e.textContent = msg; e.classList.add('on'); }
+function clearerr(id) { document.getElementById(id).classList.remove('on'); }
+function fmt(ts) { return new Date(ts).toLocaleTimeString('ru', {hour:'2-digit', minute:'2-digit'}); }
+
+function go(p) {
+  document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('on'); });
+  document.querySelectorAll('.ntab').forEach(function(x){ x.classList.remove('on'); });
+  document.getElementById('page' + p).classList.add('on');
+  var t = document.getElementById('nt' + p); if (t) t.classList.add('on');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (p === 'catalog') loadlistings();
+  if (p === 'chat') loadchats();
+  if (p === 'cabinet') loadmy();
+}
+
+function atab(tab) {
+  document.getElementById('fl').style.display = tab === 'l' ? 'block' : 'none';
+  document.getElementById('fr').style.display = tab === 'r' ? 'block' : 'none';
+  var on = 'flex:1;height:30px;background:var(--s2);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer';
+  var off = 'flex:1;height:30px;background:none;border:none;border-radius:6px;color:var(--t2);font-size:13px;font-weight:600;cursor:pointer';
+  document.getElementById('tl').style.cssText = tab === 'l' ? on : off;
+  document.getElementById('tr').style.cssText = tab === 'r' ? on : off;
+}
+
+async function dologin() {
+  var e = document.getElementById('le').value.trim();
+  var p = document.getElementById('lp').value;
+  var btn = document.getElementById('lbtn');
+  clearerr('lerr');
+  if (!e || !p) { showerr('lerr', 'Заполните все поля'); return; }
+  btn.disabled = true; btn.textContent = 'Входим...';
+  var res = await sb.auth.signInWithPassword({email: e, password: p});
+  btn.disabled = false; btn.textContent = 'Войти';
+  if (res.error) { showerr('lerr', res.error.message.includes('Invalid') ? 'Неверный email или пароль' : res.error.message); return; }
+  U = {id: res.data.user.id, email: e, username: (res.data.user.user_metadata && res.data.user.user_metadata.username) ? res.data.user.user_metadata.username : e.split('@')[0]};
+  upnav(); cm('mauth'); toast('Добро пожаловать!');
+  if (window._pend) { window._pend(); window._pend = null; }
+}
+
+async function doreg() {
+  var n = document.getElementById('rn').value.trim();
+  var e = document.getElementById('re').value.trim();
+  var p = document.getElementById('rp').value;
+  var btn = document.getElementById('rbtn');
+  clearerr('rerr');
+  if (!n || !e || !p) { showerr('rerr', 'Заполните все поля'); return; }
+  if (p.length < 6) { showerr('rerr', 'Пароль минимум 6 символов'); return; }
+  btn.disabled = true; btn.textContent = 'Создаём...';
+  var res = await sb.auth.signUp({email: e, password: p, options: {data: {username: n}, emailRedirectTo: location.origin}});
+  btn.disabled = false; btn.textContent = 'Создать аккаунт';
+  if (res.error) { showerr('rerr', res.error.message.includes('rate') ? 'Подождите и попробуйте снова' : res.error.message); return; }
+  if (res.data && res.data.session) {
+    U = {id: res.data.user.id, email: e, username: n};
+    upnav(); cm('mauth'); toast('Аккаунт создан!');
+    if (window._pend) { window._pend(); window._pend = null; }
+  } else {
+    toast('Подтвердите email и войдите', 'info');
+    atab('l'); document.getElementById('le').value = e;
+  }
+}
+
+async function dologout() {
+  await sb.auth.signOut(); U = null; upnav(); go('catalog'); toast('Вы вышли', 'info');
+}
+
+function upnav() {
+  var nr = document.getElementById('nright');
+  if (U) {
+    var ini = U.username.substring(0, 2).toUpperCase();
+    nr.innerHTML = '<div style="position:relative" id="ubtn">' +
+      '<div onclick="toggleum()" style="display:flex;align-items:center;gap:8px;padding:5px 12px;background:var(--bg2);border:1px solid var(--b1);border-radius:8px;cursor:pointer">' +
+      '<div style="width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff">' + ini + '</div>' +
+      '<span style="font-size:13px;font-weight:600;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + U.username + '</span>' +
+      '<span style="color:var(--t3);font-size:11px">&#x25BE;</span></div>' +
+      '<div id="um" style="display:none;position:absolute;top:42px;right:0;background:var(--bg2);border:1px solid var(--b2);border-radius:10px;padding:5px;min-width:160px;z-index:999;box-shadow:0 8px 24px rgba(0,0,0,.5)">' +
+      '<button onclick="go(&quot;cabinet&quot;);toggleum()" style="width:100%;height:34px;background:none;border:none;color:var(--t1);text-align:left;padding:0 10px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer" onmouseover="this.style.background=&quot;var(--s1)&quot;" onmouseout="this.style.background=&quot;none&quot;">&#x1F4E6; Кабинет</button>' +
+      '<button onclick="dologout()" style="width:100%;height:34px;background:none;border:none;color:var(--red);text-align:left;padding:0 10px;font-size:13px;font-weight:600;border-radius:7px;cursor:pointer" onmouseover="this.style.background=&quot;var(--rd)&quot;" onmouseout="this.style.background=&quot;none&quot;">Выйти</button>' +
+      '</div></div>' +
+      '<button class="btn bp" onclick="rauth(function(){om(&quot;madd&quot;)})">+ Продать</button>';
+  } else {
+    nr.innerHTML = '<button class="btn bg" onclick="om(&quot;mauth&quot;)">Войти</button>' +
+      '<button class="btn bp" onclick="rauth(function(){om(&quot;madd&quot;)})">+ Продать</button>';
+  }
+}
+
+function toggleum() { var m = document.getElementById('um'); if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none'; }
+document.addEventListener('click', function(e) {
+  var btn = document.getElementById('ubtn');
+  if (btn && !btn.contains(e.target)) { var m = document.getElementById('um'); if (m) m.style.display = 'none'; }
+});
+
+async function loadlistings(f) {
+  if (f === undefined) f = flt;
+  var w = document.getElementById('lw');
+  w.innerHTML = '<div class="skel" style="margin-bottom:7px"></div><div class="skel" style="margin-bottom:7px"></div><div class="skel"></div>';
+  try {
+    var q = sb.from('listings').select('*').eq('is_active', true).order('created_at', {ascending: false});
+    if (f !== 'all') q = q.eq('category', f);
+    var res = await q;
+    if (res.error) throw res.error;
+    all = res.data || [];
+    render(all, w);
+  } catch(e) {
+    w.innerHTML = '<div class="empty"><div class="emptyic">&#x26A0;&#xFE0F;</div><div class="emptyt">Ошибка загрузки</div><div style="font-size:12px">' + e.message + '</div></div>';
+  }
+}
+
+function render(data, w) {
+  if (!data.length) { w.innerHTML = '<div class="empty"><div class="emptyic">&#x1F4ED;</div><div class="emptyt">Нет товаров</div><div>Будьте первым!</div></div>'; return; }
+  var html = '<div class="listings">';
+  for (var i = 0; i < data.length; i++) {
+    var l = data[i];
+    var em = l.emoji || EMOJI[l.category] || '🎮';
+    var th = l.photo_url ? '<img class="lth" src="' + l.photo_url + '" style="width:52px;height:52px;border-radius:9px;object-fit:cover;background:var(--s1)" onerror="this.style.display=&quot;none&quot;;this.nextSibling.style.display=&quot;flex&quot;">' : '';
+    var ic = '<div class="ltic" style="background:#' + (l.bg||'1a2030') + ';' + (l.photo_url ? 'display:none' : '') + '">' + em + '</div>';
+    html += '<div class="lrow" onclick="openprod(' + l.id + ')">' + th + ic +
+      '<div class="linfo"><div class="ltitle">' + l.title + '</div>' +
+      '<div class="lmeta"><span class="lsell">' + l.seller_name + '</span><span class="ldot"></span><span>' + l.category + '</span></div></div>' +
+      '<div class="lrat">&#x2605; ' + Number(l.rating||5).toFixed(1) + '</div>' +
+      '<div class="lpri"><div class="val">' + Number(l.price).toLocaleString() + ' &#x20B8;</div><div class="sub">' + (l.delivery||'Быстро') + '</div></div>' +
+      '<button class="bbuy" onclick="event.stopPropagation();openprod(' + l.id + ')">Купить</button></div>';
+  }
+  html += '</div>';
+  w.innerHTML = html;
+}
+
+function fcat(cat, el) {
+  document.querySelectorAll('.sbi').forEach(function(i){ i.classList.remove('on'); });
+  el.classList.add('on'); flt = cat;
+  document.getElementById('catttl').textContent = cat === 'all' ? 'Все товары' : cat;
+  loadlistings(cat);
+}
+
+function dosearch(q) {
+  if (!q) { render(all, document.getElementById('lw')); return; }
+  var f = all.filter(function(l){ return l.title.toLowerCase().includes(q.toLowerCase()) || (l.category||'').toLowerCase().includes(q.toLowerCase()) || (l.seller_name||'').toLowerCase().includes(q.toLowerCase()); });
+  render(f, document.getElementById('lw'));
+}
+
+function openprod(id) {
+  var p = null;
+  for (var i = 0; i < all.length; i++) { if (all[i].id === id || all[i].id === Number(id)) { p = all[i]; break; } }
+  if (!p) return;
+  curP = p;
+  var iw = document.getElementById('pmimg');
+  if (p.photo_url) {
+    iw.innerHTML = '<img class="pmimg" src="' + p.photo_url + '" onerror="this.outerHTML=&quot;<div class=pmic>' + (p.emoji||'🎮') + '</div>&quot;">';
+  } else {
+    iw.innerHTML = '<div class="pmic">' + (p.emoji || EMOJI[p.category] || '🎮') + '</div>';
+  }
+  document.getElementById('pmttl').textContent = p.title;
+  document.getElementById('pmsell').textContent = p.seller_name + '  ★' + Number(p.rating||5).toFixed(1);
+  document.getElementById('pmdesc').textContent = p.description || 'Описание не указано';
+  document.getElementById('pmpri').textContent = Number(p.price).toLocaleString() + ' ₸';
+  document.getElementById('pmdel').textContent = '⚡ ' + (p.delivery || 'Быстро');
+  om('mprod');
+}
+
+function buyprod() {
+  if (!U) { cm('mprod'); om('mauth'); return; }
+  toast('Заявка принята! Продавец свяжется с вами.');
+  cm('mprod');
+}
+
+function chatfromprod() {
+  if (!U) { cm('mprod'); om('mauth'); return; }
+  if (!curP) return;
+  cm('mprod'); go('chat');
+  setTimeout(function(){ openchat(curP.user_id, curP.seller_name, curP.id, curP.title); }, 300);
+}
+
+function onphoto(input) {
+  var file = input.files[0]; if (!file) return;
+  if (file.size > 5*1024*1024) { toast('Максимум 5MB', 'err'); return; }
+  var r = new FileReader();
+  r.onload = function(e) {
+    photoB64 = e.target.result;
+    var pv = document.getElementById('pprev');
+    pv.src = photoB64; pv.style.display = 'block';
+    document.getElementById('pdrop').style.opacity = '.5';
+  };
+  r.readAsDataURL(file);
+}
+
+async function addlisting() {
+  if (!U) { om('mauth'); return; }
+  var t = document.getElementById('nt').value.trim();
+  var c = document.getElementById('nc').value;
+  var p = parseInt(document.getElementById('np').value);
+  var d = document.getElementById('nd').value;
+  var desc = document.getElementById('ndesc').value.trim();
+  var btn = document.getElementById('abtn');
+  clearerr('aerr');
+  if (!t || !p) { showerr('aerr', 'Заполните название и цену'); return; }
+  btn.disabled = true; btn.textContent = 'Публикуем...';
+  var res = await sb.from('listings').insert([{user_id:U.id, seller_name:U.username, title:t, category:c, description:desc, price:p, delivery:d, photo_url:photoB64||null, emoji:EMOJI[c]||'📦', bg:BG[c]||'1a1a1a', is_active:true}]).select();
+  btn.disabled = false; btn.textContent = 'Опубликовать';
+  if (res.error) { showerr('aerr', res.error.message); return; }
+  if (res.data && res.data[0]) all.unshift(res.data[0]);
+  cm('madd'); toast('Товар опубликован!');
+  photoB64 = null;
+  document.getElementById('pprev').style.display = 'none';
+  document.getElementById('pdrop').style.opacity = '1';
+  ['nt','np','ndesc','ndat'].forEach(function(id){ document.getElementById(id).value = ''; });
+  loadlistings(flt); loadmy();
+}
+
+function cabt(n) {
+  ['listings','payouts'].forEach(function(t){ document.getElementById('cabt'+t).style.display = 'none'; });
+  document.querySelectorAll('.ctab').forEach(function(t){ t.classList.remove('on'); });
+  document.getElementById('cabt'+n).style.display = 'block';
+  var idx = {listings:0, payouts:1};
+  document.querySelectorAll('.ctab')[idx[n]].classList.add('on');
+}
+
+async function loadmy() {
+  if (!U) return;
+  var w = document.getElementById('mlw');
+  w.innerHTML = '<div class="skel" style="margin-bottom:7px"></div><div class="skel"></div>';
+  var res = await sb.from('listings').select('*').eq('user_id', U.id).order('created_at', {ascending:false});
+  var data = res.data;
+  if (!data || !data.length) { w.innerHTML = '<div class="empty"><div class="emptyic">&#x1F4E6;</div><div class="emptyt">Нет товаров</div></div>'; return; }
+  var html = '';
+  for (var i = 0; i < data.length; i++) {
+    var l = data[i];
+    var th = l.photo_url ? '<img class="mlth" src="' + l.photo_url + '" onerror="this.style.display=&quot;none&quot;;this.nextSibling.style.display=&quot;flex&quot;">' : '';
+    var ic = '<div class="mltic" style="background:#' + (l.bg||'1a2030') + ';' + (l.photo_url ? 'display:none' : '') + '">' + (l.emoji||'🎮') + '</div>';
+    html += '<div class="mlrow">' + th + ic +
+      '<div><div class="mlname">' + l.title + '</div><div class="mlsub">' + l.category + '</div></div>' +
+      '<div><div style="font-size:14px;font-weight:700">' + Number(l.price).toLocaleString() + ' &#x20B8;</div><div style="font-size:10px;color:var(--t3)">цена</div></div>' +
+      '<span class="bdg bdgg">&#x25CF; Активен</span>' +
+      '<button class="bxs bxsd" onclick="deldl(' + l.id + ')">&#x1F5D1;&#xFE0F;</button></div>';
+  }
+  w.innerHTML = html;
+  var earn = data.reduce(function(s,l){ return s + (l.sales||0)*(l.price||0); }, 0);
+  var sales = data.reduce(function(s,l){ return s + (l.sales||0); }, 0);
+  document.getElementById('svearn').textContent = earn.toLocaleString() + ' ₸';
+  document.getElementById('svsales').textContent = sales;
+  document.getElementById('svrate').textContent = data.length ? (data.reduce(function(s,l){ return s+(l.rating||5); },0)/data.length).toFixed(1) : '—';
+}
+
+async function deldl(id) {
+  if (!confirm('Удалить товар?')) return;
+  await sb.from('listings').delete().eq('id', id);
+  toast('Удалено', 'info'); loadmy(); loadlistings(flt);
+}
+
+async function loadchats() {
+  if (!U) return;
+  var res = await sb.from('messages').select('*').or('sender_id.eq.' + U.id + ',receiver_id.eq.' + U.id).order('created_at', {ascending:false});
+  var data = res.data;
+  if (!data || !data.length) return;
+  var map = {};
+  for (var i = 0; i < data.length; i++) {
+    var m = data[i];
+    var oid = m.sender_id === U.id ? m.receiver_id : m.sender_id;
+    var oname = m.sender_id === U.id ? (m.receiver_name||'?') : m.sender_name;
+    if (!map[oid]) map[oid] = {id:oid, name:oname, msgs:[], lid:m.listing_id, unread:0};
+    map[oid].msgs.push(m);
+    if (!m.is_read && m.receiver_id === U.id) map[oid].unread++;
+  }
+  var body = document.getElementById('clibody');
+  var html = '';
+  var keys = Object.keys(map);
+  for (var k = 0; k < keys.length; k++) {
+    var c = map[keys[k]];
+    var last = c.msgs[0];
+    var ini = c.name.substring(0,2).toUpperCase();
+    var safeName = c.name.replace(/"/g,'&quot;');
+    html += '<div class="cli" onclick="openchat(&quot;' + c.id + '&quot;,&quot;' + safeName + '&quot;,' + (c.lid||0) + ',&quot;&quot;)">' +
+      '<div class="clav">' + ini + '</div>' +
+      '<div style="flex:1;min-width:0"><div class="clname">' + c.name + '</div><div class="clprev">' + last.text + '</div></div>' +
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><div class="cltime">' + fmt(last.created_at) + '</div>' +
+      (c.unread ? '<div class="clunread">' + c.unread + '</div>' : '') + '</div></div>';
+  }
+  body.innerHTML = html;
+}
+
+async function openchat(oid, oname, lid, ltitle) {
+  if (!U) return;
+  curChat = {id:oid, name:oname, lid:lid, ltitle:ltitle};
+  var ini = oname.substring(0,2).toUpperCase();
+  var box = document.getElementById('chatbox');
+  box.innerHTML = '<div class="chathd"><div class="chatav">' + ini + '</div>' +
+    '<div><div style="font-size:14px;font-weight:700">' + oname + '</div><div style="font-size:11px;color:var(--t3)">' + (ltitle||'Диалог') + '</div></div></div>' +
+    '<div class="chatmsgs" id="cmb"></div>' +
+    '<div class="chatinpw"><input class="chatinp" id="cinp" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter')sendm()">' +
+    '<button class="chatsend" onclick="sendm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>';
+  await loadmsgs(oid, lid);
+  if (chatSub) sb.removeChannel(chatSub);
+  chatSub = sb.channel('ch' + oid + U.id.substring(0,8))
+    .on('postgres_changes', {event:'INSERT', schema:'public', table:'messages'}, function(pl){
+      var m = pl.new;
+      if ((m.sender_id===U.id && m.receiver_id===oid) || (m.sender_id===oid && m.receiver_id===U.id)) appendm(m, true);
+    }).subscribe();
+}
+
+async function loadmsgs(oid, lid) {
+  var box = document.getElementById('cmb'); if (!box) return;
+  box.innerHTML = '<div style="text-align:center;color:var(--t3);font-size:13px;padding:20px">Загрузка...</div>';
+  var q = sb.from('messages').select('*').or('and(sender_id.eq.' + U.id + ',receiver_id.eq.' + oid + '),and(sender_id.eq.' + oid + ',receiver_id.eq.' + U.id + ')');
+  if (lid) q = q.eq('listing_id', lid);
+  q = q.order('created_at', {ascending:true});
+  var res = await q;
+  box.innerHTML = '';
+  if (!res.data || !res.data.length) { box.innerHTML = '<div style="text-align:center;color:var(--t3);font-size:13px;padding:30px">Начните диалог!</div>'; return; }
+  for (var i = 0; i < res.data.length; i++) appendm(res.data[i], false);
+  box.scrollTop = box.scrollHeight;
+  await sb.from('messages').update({is_read:true}).eq('receiver_id', U.id).eq('sender_id', oid);
+}
+
+function appendm(m, scroll) {
+  var box = document.getElementById('cmb'); if (!box) return;
+  var isMe = m.sender_id === U.id;
+  var ini = (isMe ? U.username : (curChat && curChat.name ? curChat.name : '?')).substring(0,2).toUpperCase();
+  var txt = m.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var d = document.createElement('div');
+  d.className = 'msg ' + (isMe ? 'me' : 'them');
+  d.innerHTML = (isMe ? '' : '<div class="mav">' + ini + '</div>') +
+    '<div><div class="mbub">' + txt + '</div><div class="mtime">' + fmt(m.created_at) + '</div></div>' +
+    (isMe ? '<div class="mav" style="background:linear-gradient(135deg,var(--a),var(--a2))">' + ini + '</div>' : '');
+  box.appendChild(d);
+  if (scroll) box.scrollTop = box.scrollHeight;
+}
+
+async function sendm() {
+  if (!U || !curChat) return;
+  var inp = document.getElementById('cinp'); if (!inp) return;
+  var txt = inp.value.trim(); if (!txt) return;
+  inp.value = '';
+  var res = await sb.from('messages').insert([{
+    listing_id: curChat.lid || null,
+    sender_id: U.id, sender_name: U.username,
+    receiver_id: curChat.id, receiver_name: curChat.name,
+    text: txt
+  }]).select();
+  if (res.error) { toast('Ошибка: ' + res.error.message, 'err'); return; }
+  if (res.data && res.data[0]) appendm(res.data[0], true);
+}
+
+function genkaspi() {
+  var box = document.getElementById('kqr');
+  box.style.cssText = 'background:#fff;padding:14px;border-radius:8px;margin-bottom:12px;text-align:center;min-height:60px';
+  var cv = document.createElement('canvas'); cv.width = 110; cv.height = 110;
+  var ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,110,110);
+  ctx.fillStyle = '#1a2744';
+  var pat = [1,1,1,1,1,1,1,0,1,0,1,1,0,0,0,0,0,1,0,0,1,0,1,0,1,1,1,0,1,0,1,1,1,1,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,0,1,0,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,1,1,0,1,0,1,1,1,0,1,0,0,1,0,0,0,1,0,0,0,1,0,1,0,1];
+  for (var i = 0; i < pat.length; i++) { if (pat[i]) ctx.fillRect((i%11)*9+5, Math.floor(i/11)*9+5, 8, 8); }
+  box.innerHTML = '';
+  box.appendChild(cv);
+  var lb = document.createElement('div'); lb.textContent = 'Сканируйте в Kaspi.kz';
+  lb.style.cssText = 'font-size:11px;color:#666;margin-top:6px'; box.appendChild(lb);
+  toast('QR готов!');
+}
+
+async function init() {
+  try {
+    var res = await sb.auth.getSession();
+    if (res.data && res.data.session && res.data.session.user) {
+      var u = res.data.session.user;
+      U = {id: u.id, email: u.email, username: (u.user_metadata && u.user_metadata.username) ? u.user_metadata.username : u.email.split('@')[0]};
+      upnav();
+    }
+  } catch(e) {}
+  loadlistings();
+}
+init();
+</script>
+</body>
+</html>
