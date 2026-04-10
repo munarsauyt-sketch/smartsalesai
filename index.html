@@ -654,7 +654,7 @@ async function openchat(oid, oname, lid, ltitle) {
   box.innerHTML = '<div class="chathd"><div class="chatav">' + ini + '</div>' +
     '<div><div style="font-size:14px;font-weight:700">' + oname + '</div><div style="font-size:11px;color:var(--t3)">' + (ltitle||'Диалог') + '</div></div></div>' +
     '<div class="chatmsgs" id="cmb"></div>' +
-    '<div class="chatinpw"><input class="chatinp" id="cinp" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter')sendm()">' +
+    '<div class="chatinpw"><input class="chatinp" id="cinp" placeholder="Написать сообщение..." onkeydown="if(event.key===&quot;Enter&quot;)sendm()">' +
     '<button class="chatsend" onclick="sendm()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>';
   await loadmsgs(oid, lid);
   if (chatSub) sb.removeChannel(chatSub);
