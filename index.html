@@ -916,6 +916,52 @@ footer {
   .cta-section { padding: 80px 24px; }
   h1 { letter-spacing: -1px; }
 }
+
+/* FAQ */
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.faq-item:hover { border-color: rgba(108,99,255,0.3); }
+.faq-q {
+  width: 100%;
+  background: var(--card);
+  border: none;
+  padding: 20px 24px;
+  color: var(--text);
+  font-family: "Manrope", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  transition: background 0.2s;
+}
+.faq-q:hover { background: rgba(255,255,255,0.06); }
+.faq-arrow { transition: transform 0.3s; color: var(--accent); font-size: 1.1rem; }
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+.faq-a {
+  display: none;
+  padding: 0 24px 20px;
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.7;
+  background: var(--card);
+}
+.faq-item.open .faq-a { display: block; }
+
+/* Live counter pulse */
+.hero-badge { cursor: default; }
+#live-count {
+  font-weight: 800;
+  color: var(--accent3);
+}
 </style>
 </head>
 <body>
@@ -938,7 +984,9 @@ footer {
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-badge">🤖 ИИ-продавец работает 24/7</div>
+    <div class="hero-badge">
+      <span id="live-count">74</span> человек сейчас в боте
+    </div>
     <h1>Продавай <span class="accent">цифровые</span><br>товары пока <span class="accent2">спишь</span></h1>
     <p class="hero-sub">SmartSalesAI — маркетплейс игровых аккаунтов и валюты с ИИ-продавцом. Бот отвечает клиентам за тебя и закрывает сделки автоматически.</p>
     <div class="hero-btns">
@@ -1041,38 +1089,97 @@ footer {
     <h2 class="section-title reveal">Всё что нужно<br>для продаж</h2>
   </div>
   <div class="features-grid">
-    <div class="feature-card reveal">
-      <div class="feature-icon" style="background:rgba(108,99,255,0.15);">🤖</div>
+    <div class="feature-card reveal" style="background:linear-gradient(135deg,rgba(108,99,255,0.12),rgba(108,99,255,0.04));border-color:rgba(108,99,255,0.25);">
+      <div class="feature-icon" style="background:rgba(108,99,255,0.2);">🤖</div>
       <h3>ИИ-продавец</h3>
       <p>Groq AI отвечает на вопросы покупателей, рассказывает о товаре и убеждает купить — как живой продавец</p>
     </div>
-    <div class="feature-card reveal">
-      <div class="feature-icon" style="background:rgba(67,233,123,0.15);">⚡</div>
+    <div class="feature-card reveal" style="background:linear-gradient(135deg,rgba(67,233,123,0.1),rgba(67,233,123,0.03));border-color:rgba(67,233,123,0.2);">
+      <div class="feature-icon" style="background:rgba(67,233,123,0.2);">⚡</div>
       <h3>Мгновенный ответ</h3>
       <p>От 30 секунд до 2 часов — настраивай таймер под себя. Клиент не уйдёт к конкуренту</p>
     </div>
-    <div class="feature-card reveal">
-      <div class="feature-icon" style="background:rgba(255,101,132,0.15);">🎮</div>
+    <div class="feature-card reveal" style="background:linear-gradient(135deg,rgba(255,101,132,0.1),rgba(255,101,132,0.03));border-color:rgba(255,101,132,0.2);">
+      <div class="feature-icon" style="background:rgba(255,101,132,0.2);">🎮</div>
       <h3>6 категорий игр</h3>
       <p>Brawl Stars, PUBG Mobile, Roblox, Standoff 2, Steam, CS2 — все популярные игры в одном месте</p>
     </div>
-    <div class="feature-card reveal">
-      <div class="feature-icon" style="background:rgba(255,200,0,0.15);">📣</div>
+    <div class="feature-card reveal" style="background:linear-gradient(135deg,rgba(255,200,0,0.1),rgba(255,200,0,0.03));border-color:rgba(255,200,0,0.2);">
+      <div class="feature-icon" style="background:rgba(255,200,0,0.2);">📣</div>
       <h3>Реклама товаров</h3>
       <p>Баннеры в каталоге, топ в категории, рассылка всем пользователям — продвигай свои товары</p>
     </div>
-    <div class="feature-card reveal">
-      <div class="feature-icon" style="background:rgba(0,200,255,0.15);">✅</div>
+    <div class="feature-card reveal" style="background:linear-gradient(135deg,rgba(0,200,255,0.1),rgba(0,200,255,0.03));border-color:rgba(0,200,255,0.2);">
+      <div class="feature-icon" style="background:rgba(0,200,255,0.2);">✅</div>
       <h3>Верификация продавцов</h3>
       <p>Значок проверенного продавца повышает доверие покупателей и увеличивает продажи</p>
     </div>
-    <div class="feature-card reveal">
-      <div class="feature-icon" style="background:rgba(160,100,255,0.15);">📊</div>
+    <div class="feature-card reveal" style="background:linear-gradient(135deg,rgba(160,100,255,0.1),rgba(160,100,255,0.03));border-color:rgba(160,100,255,0.2);">
+      <div class="feature-icon" style="background:rgba(160,100,255,0.2);">📊</div>
       <h3>Статистика и аналитика</h3>
       <p>Просмотры товаров, отзывы покупателей, рейтинг продавца — всё в личном кабинете</p>
     </div>
   </div>
 </section>
+
+<!-- DEMO SCREENSHOTS placeholder -->
+<section style="padding:100px 60px; text-align:center; overflow:hidden;">
+  <div style="max-width:1100px; margin:0 auto;">
+    <span class="section-tag reveal">Демо</span>
+    <h2 class="section-title reveal">Смотри как это работает</h2>
+    <p class="section-sub reveal" style="margin:0 auto 60px;">Реальный диалог — покупатель пишет, ИИ отвечает за продавца</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; text-align:left;" class="reveal">
+      <!-- Before -->
+      <div style="background:var(--card); border:1px solid rgba(255,101,132,0.2); border-radius:24px; padding:32px; position:relative;">
+        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,101,132,0.1); border:1px solid rgba(255,101,132,0.2); padding:6px 14px; border-radius:100px; font-size:0.78rem; color:#ff6584; margin-bottom:24px; font-weight:600;">
+          ❌ Без SmartSalesAI
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,101,132,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;">👤</div>
+            <div style="background:rgba(255,255,255,0.05);padding:10px 14px;border-radius:4px 14px 14px 14px;font-size:0.85rem;line-height:1.5;">Привет! Этот акк ещё продаётся?</div>
+          </div>
+          <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <div style="background:rgba(255,101,132,0.08);border:1px dashed rgba(255,101,132,0.2);padding:10px 14px;border-radius:14px 4px 14px 14px;font-size:0.85rem;line-height:1.5;color:var(--muted);">...</div>
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;">😴</div>
+          </div>
+          <div style="text-align:center; padding:16px; background:rgba(255,101,132,0.06); border-radius:10px; font-size:0.82rem; color:#ff6584;">
+            Продавец не ответил. Покупатель ушёл к другому.
+          </div>
+        </div>
+      </div>
+      <!-- After -->
+      <div style="background:var(--card); border:1px solid rgba(67,233,123,0.2); border-radius:24px; padding:32px; position:relative;">
+        <div style="display:inline-flex; align-items:center; gap:8px; background:rgba(67,233,123,0.1); border:1px solid rgba(67,233,123,0.2); padding:6px 14px; border-radius:100px; font-size:0.78rem; color:#43e97b; margin-bottom:24px; font-weight:600;">
+          ✅ С SmartSalesAI
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(67,233,123,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;">👤</div>
+            <div style="background:rgba(255,255,255,0.05);padding:10px 14px;border-radius:4px 14px 14px 14px;font-size:0.85rem;line-height:1.5;">Привет! Этот акк ещё продаётся?</div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;">🤖</div>
+            <div style="background:rgba(108,99,255,0.12);border:1px solid rgba(108,99,255,0.2);padding:10px 14px;border-radius:4px 14px 14px 14px;font-size:0.85rem;line-height:1.5;">Да, доступен! 68к кубков, Леон макс + почта. Передача 10 минут 🔥 Берёшь?</div>
+          </div>
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div style="width:32px;height:32px;border-radius:50%;background:rgba(67,233,123,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.8rem;">👤</div>
+            <div style="background:rgba(255,255,255,0.05);padding:10px 14px;border-radius:4px 14px 14px 14px;font-size:0.85rem;line-height:1.5;">Беру! Куда платить?</div>
+          </div>
+          <div style="text-align:center; padding:16px; background:rgba(67,233,123,0.06); border-radius:10px; font-size:0.82rem; color:#43e97b;">
+            💰 Сделка закрыта. Продавец спал.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+@media (max-width:768px) {
+  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
 
 <!-- ABOUT -->
 <section class="about" id="about">
@@ -1211,6 +1318,66 @@ footer {
   </div>
 </section>
 
+<!-- FAQ -->
+<section style="padding:120px 60px; background:var(--bg2);">
+  <div style="max-width:800px; margin:0 auto;">
+    <div style="text-align:center; margin-bottom:60px;">
+      <span class="section-tag reveal">FAQ</span>
+      <h2 class="section-title reveal">Частые вопросы</h2>
+    </div>
+    <div id="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Как работает ИИ-продавец? <span class="faq-arrow">↓</span>
+        </button>
+        <div class="faq-a">
+          Когда покупатель пишет тебе в чат, запускается таймер. Если ты не ответил за указанное время (от 30 секунд до 2 часов) — ИИ автоматически отвечает вместо тебя. Он знает все твои товары и продаёт их как живой продавец.
+        </div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Нужно ли скачивать приложение? <span class="faq-arrow">↓</span>
+        </button>
+        <div class="faq-a">
+          Нет. SmartSalesAI работает прямо в Telegram. Просто нажми «Открыть бота» и начни пользоваться — без регистрации и установки.
+        </div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Как получить оплату от покупателей? <span class="faq-arrow">↓</span>
+        </button>
+        <div class="faq-a">
+          Покупатель переводит деньги напрямую тебе — через Kaspi, ЮMoney или любым удобным способом. Ты сам указываешь реквизиты в описании товара или в чате.
+        </div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Можно ли настроить ИИ под свой стиль? <span class="faq-arrow">↓</span>
+        </button>
+        <div class="faq-a">
+          Да! В кабинете продавца есть настройка промпта — ты пишешь инструкцию для ИИ в свободной форме. Например: «Отвечай дружелюбно, предлагай скидку при торге, работай на русском».
+        </div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Что если ИИ скажет что-то не то? <span class="faq-arrow">↓</span>
+        </button>
+        <div class="faq-a">
+          Ты всегда можешь вмешаться и ответить сам — тогда ИИ автоматически замолчит и диалог перейдёт к тебе. Также можно настроить таймер подлиннее, чтобы успевать отвечать первым.
+        </div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Сколько стоит ИИ-продавец? <span class="faq-arrow">↓</span>
+        </button>
+        <div class="faq-a">
+          500 рублей в месяц. Базовое размещение товаров — полностью бесплатно. Одна сохранённая сделка уже окупает подписку.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- CTA -->
 <section class="cta-section">
   <div class="cta-bg"></div>
@@ -1307,6 +1474,33 @@ window.addEventListener('scroll', () => {
     nav.style.borderBottomColor = 'var(--border)';
   }
 });
+</script>
+
+<script>
+// Live online counter - smoothly fluctuates
+(function() {
+  var count = 72 + Math.floor(Math.random() * 8);
+  var el = document.getElementById('live-count');
+  if (!el) return;
+  el.textContent = count;
+  setInterval(function() {
+    var delta = Math.random() > 0.5 ? 1 : -1;
+    if (count <= 65) delta = 1;
+    if (count >= 92) delta = -1;
+    count += delta;
+    el.textContent = count;
+  }, 3000 + Math.random() * 4000);
+})();
+
+// FAQ toggle
+function toggleFaq(btn) {
+  var item = btn.closest('.faq-item');
+  var isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(function(i) {
+    i.classList.remove('open');
+  });
+  if (!isOpen) item.classList.add('open');
+}
 </script>
 </body>
 </html>
